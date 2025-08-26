@@ -7,7 +7,7 @@ from flask import request, abort
 from google.api_core.retry import if_exception_type
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
-from linebot.models import (MessageEvent, TextMessage, TextSendMessage, ImageMessage, FlexSendMessage)
+from linebot.models import (MessageEvent, TextMessage, TextSendMessage, ImageMessage, FlexSendMessage,QuickReply, QuickReplyButton, MessageAction)
 import threading
 import time
 import os
@@ -215,10 +215,14 @@ def handle_image_message(event):
 
     gpt_response = chat_gpt.chatgpt_image(public_image_url)
     user_context[event.source.user_id] = gpt_response  # 儲存 GPT 回覆到使用者上下文
-    
+    quick_reply_buttons = [
+        QuickReplyButton(
+            action=MessageAction(label='加入飲食紀錄', text='加入飲食紀錄')
+        )
+    ]
     line_bot_api.reply_message(
         event.reply_token,
-        TextMessage(text=gpt_response)
+        TextSendMessage(text=gpt_response,quick_reply=QuickReply(items=quick_reply_buttons))
     )
 
 # 主程式
